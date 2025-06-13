@@ -9,7 +9,6 @@ export interface Property {
   bathrooms?: number;
   square_feet?: number;
   year_built?: number;
-  architect?: string;
   images?: string[];
   features?: string[];
   status?: string;

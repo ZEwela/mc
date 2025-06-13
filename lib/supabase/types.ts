@@ -21,7 +21,6 @@ export interface Database {
           bathrooms: number | null;
           square_feet: number | null;
           year_built: number | null;
-          architect: string | null;
           images: string[] | null;
           features: string[] | null;
           status: string | null;
@@ -40,7 +39,6 @@ export interface Database {
           bathrooms?: number | null;
           square_feet?: number | null;
           year_built?: number | null;
-          architect?: string | null;
           images?: string[] | null;
           features?: string[] | null;
           status?: string | null;
@@ -59,7 +57,6 @@ export interface Database {
           bathrooms?: number | null;
           square_feet?: number | null;
           year_built?: number | null;
-          architect?: string | null;
           images?: string[] | null;
           features?: string[] | null;
           status?: string | null;
