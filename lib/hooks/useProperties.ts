@@ -16,7 +16,7 @@ export function useProperties(filters?: PropertyFilters) {
         let query = supabase
           .from("properties")
           .select("*")
-          .eq("status", "available")
+          .eq("status", filters?.status || "available")
           .order("created_at", { ascending: false });
 
         // Apply filters

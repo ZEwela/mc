@@ -5,6 +5,8 @@ import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 import { AuthProvider } from "@/providers/AuthProvider";
 import SupabaseProvider from "./supabase-provider";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const inter = Inter({ subsets: ["latin"] });
 

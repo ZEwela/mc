@@ -2,6 +2,7 @@
 import { Hero } from "@/components/common/Hero";
 import { TearEffect } from "@/components/common/TearEffect";
 import { FeaturedProperties } from "@/components/properties/FeaturedProperties";
+import { SoldPropertiesCarousel } from "@/components/properties/SoldPropertiesCarousel";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 
@@ -59,7 +60,7 @@ export default function HomePage() {
         topBackgroundImage="/assets/kateryna-horska-OgzA9trJqnI-unsplash-bath.jpg"
         bottomColor={"#F5F1EC"}
         topContent={aboutTeaser}
-        bottomContent={<FeaturedProperties />}
+        bottomContent={<SoldPropertiesCarousel />}
       />
     </>
   );

@@ -25,6 +25,7 @@ export interface PropertyFilters {
   min_bedrooms?: number;
   max_bedrooms?: number;
   featured?: boolean;
+  status?: string;
 }
 
 export type PropertyType =
