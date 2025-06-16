@@ -184,29 +184,6 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Agent Info - Placeholder
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Your Agent</h3>
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full mr-3"></div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      The Modern House
-                    </p>
-                    <p className="text-sm text-gray-600">Estate Agent</p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  Specializing in exceptional design-led properties across the
-                  UK.
-                </p>
-                <Button variant="outline" size="sm" className="w-full">
-                  View Profile
-                </Button>
-              </CardContent>
-            </Card> */}
           </div>
         </div>
       </div>
