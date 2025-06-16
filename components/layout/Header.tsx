@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, Search, ArrowLeft } from "lucide-react";
+import { Menu, ArrowLeft } from "lucide-react";
 import { FaInstagram, FaFacebook } from "react-icons/fa";
 import { navLinkClass } from "@/lib/classnames";
 
@@ -60,9 +60,9 @@ export function Header() {
             ))}
           </nav>
 
-          <button className="p-2 text-gray-700 hover:text-gray-900">
+          {/* <button className="p-2 text-gray-700 hover:text-gray-900">
             <Search className="h-4 w-4" />
-          </button>
+          </button> */}
         </div>
       </div>
 

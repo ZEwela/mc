@@ -66,7 +66,7 @@ export default function PropertiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F5F1EC]">
       {/* Hero Section */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-12">
@@ -85,7 +85,7 @@ export default function PropertiesPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 bg-[#F5F1EC]">
         {/* Filters */}
         <PropertyFilter onFiltersChange={setFilters} initialFilters={filters} />
 

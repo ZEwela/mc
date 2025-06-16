@@ -67,8 +67,8 @@ export function Footer() {
           <div className="order-2 lg:col-span-1">
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-gray-300">
-              <li>phone number</li>
-              <li>hello@montcervin.com</li>
+              <li>+44 20 1234 5678r</li>
+              <li>sales@montcervin.co.uk</li>
               <li>London, UK</li>
             </ul>
           </div>

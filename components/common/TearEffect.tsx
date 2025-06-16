@@ -1,8 +1,10 @@
 import React from "react";
 
 interface TearEffectProps {
-  topColor: string;
-  bottomColor: string;
+  topColor?: string;
+  bottomColor?: string;
+  topBackgroundImage?: string; // URL for top background image
+  bottomBackgroundImage?: string; // URL for bottom background image
   direction?: "right-to-left" | "left-to-right";
   topContent?: React.ReactNode;
   bottomContent?: React.ReactNode;
@@ -12,6 +14,8 @@ interface TearEffectProps {
 export function TearEffect({
   topColor,
   bottomColor,
+  topBackgroundImage,
+  bottomBackgroundImage,
   direction = "right-to-left",
   topContent,
   bottomContent,
@@ -24,24 +28,40 @@ TearEffectProps) {
   };
 
   return (
-    <div style={{ backgroundColor: topColor }}>
+    <div
+      style={{
+        backgroundColor: topColor,
+        backgroundImage: `url(${topBackgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
       {/* Top section */}
-      <div style={{ backgroundColor: topColor }} className="relative z-10">
-        {topContent}
-      </div>
+      <div className="relative z-10">{topContent}</div>
 
       <div className="relative z-0 overflow-visible">
         {/* Tear overlay as decorative layer */}
         <div
           style={{
             backgroundColor: bottomColor,
+            backgroundImage: `url(${bottomBackgroundImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
             clipPath: clipPaths[direction],
             WebkitClipPath: clipPaths[direction],
-            height: "100px", // height of the tear
-            marginBottom: "-80px",
+            height: "300px", // height of the tear
+            marginBottom: "-250px",
           }}
         />
-        <div style={{ backgroundColor: bottomColor }} className="relative z-10">
+        <div
+          style={{
+            backgroundColor: bottomColor,
+            backgroundImage: `url(${bottomBackgroundImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+          className="relative z-10"
+        >
           {bottomContent}
         </div>
       </div>
