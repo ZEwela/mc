@@ -20,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { Inquiry, Stats, Filters } from "@/types/inquiry";
+import { Button } from "@/components/ui/Button";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -487,31 +488,43 @@ Property Team`,
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Left - Title and Welcome */}
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
                 Inquiries Dashboard
               </h1>
-              <p className="text-gray-600">
-                Welcome, {session.user.email} - Manage property inquiries and
+              <p className="text-sm sm:text-base text-gray-600">
+                Welcome, {session.user.email} – Manage property inquiries and
                 leads
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-500">
-                Last updated: {formatDate(new Date().toISOString())}
-              </span>
+
+            {/* Middle - Last Updated and Spinner */}
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span>Last updated: {formatDate(new Date().toISOString())}</span>
               {isLoading && (
                 <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
               )}
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </button>
+
+            {/* Right side: Admin button above Logout button */}
+            <div className="flex flex-col  sm:items-center sm:gap-3">
+              <Button
+                variant="outline"
+                onClick={() => router.push("/admin/properties")}
+                className="  px-4 py-2 rounded hover:bg-gray-300"
+              >
+                Admin Properties
+              </Button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors w-fit"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </div>
