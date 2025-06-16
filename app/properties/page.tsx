@@ -4,19 +4,26 @@ import { useState, useMemo } from "react";
 import { useProperties } from "@/lib/hooks/useProperties";
 import { PropertyGrid } from "@/components/properties/PropertyGrid";
 import { PropertyFilter } from "@/components/properties/PropertyFilter";
+import { useRouter } from "next/navigation";
 
 import {
   PropertySort,
   type SortOption,
 } from "@/components/properties/PropertySort";
 import type { PropertyFilters } from "@/types/property";
+import { useSession } from "@supabase/auth-helpers-react";
+import { Button } from "@/components/ui/Button";
 
 export default function PropertiesPage() {
+  const router = useRouter();
   const [filters, setFilters] = useState<PropertyFilters>({});
   const [searchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
 
   const { properties, loading, error } = useProperties(filters);
+
+  const session = useSession();
+  const isAuthenticated = !!session;
 
   // Filter properties by search query
   const searchedProperties = useMemo(() => {
@@ -90,7 +97,7 @@ export default function PropertiesPage() {
         <PropertyFilter onFiltersChange={setFilters} initialFilters={filters} />
 
         {/* Results Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 flex-col gap-4 md:flex-row">
           <div className="flex items-center space-x-4">
             <h2 className="text-2xl font-semibold text-gray-900">
               {loading ? "Loading..." : `${sortedProperties.length} Properties`}
@@ -99,6 +106,17 @@ export default function PropertiesPage() {
 
           {!loading && sortedProperties.length > 0 && (
             <PropertySort currentSort={sortBy} onSortChange={setSortBy} />
+          )}
+          {isAuthenticated && (
+            <div className="flex justify-end mb-6">
+              <Button
+                variant="outline"
+                onClick={() => router.push("/properties/new")}
+                className="  px-4 py-2 rounded hover:bg-gray-800"
+              >
+                + Add New Property
+              </Button>
+            </div>
           )}
         </div>
 

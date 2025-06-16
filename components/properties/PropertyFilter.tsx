@@ -178,20 +178,6 @@ export function PropertyFilter({
                 </select>
               </div>
 
-              {/* Architect */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Architect
-                </label>
-                <Input
-                  placeholder="Architect name"
-                  value={filters.architect || ""}
-                  onChange={(e) =>
-                    handleFilterChange("architect", e.target.value)
-                  }
-                />
-              </div>
-
               {/* Featured */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
