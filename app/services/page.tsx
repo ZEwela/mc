@@ -1,7 +1,10 @@
+"use client";
 import React from "react";
 import { Bell, MapPin, Car, Coffee, Waves, Wifi } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const ServicesPage = () => {
+  const router = useRouter();
   const services = [
     {
       icon: <Bell className="w-8 h-8" />,
@@ -85,7 +88,12 @@ const ServicesPage = () => {
           Our expert team is here to guide you through every step of the
           property acquisition process.
         </p>
-        <button className="bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200 font-medium">
+        <button
+          onClick={() => {
+            router.push("/contact");
+          }}
+          className="bg-gray-900 text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200 font-medium"
+        >
           Get Started Today
         </button>
       </div>
