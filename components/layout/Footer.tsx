@@ -9,6 +9,8 @@ const emailSchema = z.string().email();
 export function Footer() {
   const [email, setEmail] = useState("");
   const [accepted, setAccepted] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const currentYear = new Date().getFullYear();
 
@@ -16,15 +18,33 @@ export function Footer() {
 
   const isFormValid = isEmailValid(email) && accepted;
 
-  const onSubscribe = (e: FormEvent<HTMLFormElement>) => {
+  const onSubscribe = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isFormValid) {
-      // Handle the submission logic here
 
-      alert("Subscription logic still needs to be implemented");
-      // reset form
-      setEmail("");
-      setAccepted(false);
+    if (!isFormValid) return;
+
+    try {
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await response.json();
+
+      setIsSuccess(result.success);
+      setMessage(result.message || result.error || "Something happened");
+
+      if (result.success) {
+        setEmail("");
+        setAccepted(false);
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      setIsSuccess(false);
+      setMessage("Network error. Please try again.");
     }
   };
 
@@ -67,7 +87,7 @@ export function Footer() {
           <div className="order-2 lg:col-span-1">
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-gray-300">
-              <li>+44 20 1234 5678r</li>
+              <li>+44 20 1234 5678</li>
               <li>sales@montcervin.co.uk</li>
               <li>London, UK</li>
             </ul>
@@ -104,6 +124,15 @@ export function Footer() {
                     </button>
                   </div>
                 </form>
+                {message && (
+                  <div
+                    className={`mt-2 text-sm ${
+                      isSuccess ? "text-green-600" : "text-red-600"
+                    }`}
+                  >
+                    {message}
+                  </div>
+                )}
 
                 {/* Checkbox */}
                 <label className="flex items-start text-xs space-x-2 cursor-pointer">
