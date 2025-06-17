@@ -7,6 +7,7 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import SupabaseProvider from "./supabase-provider";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,7 +31,7 @@ export default function RootLayout({
             <Header />
 
             <main className="min-h-screen">{children}</main>
-
+            <Toaster position="top-right" />
             <Footer />
           </AuthProvider>
         </SupabaseProvider>

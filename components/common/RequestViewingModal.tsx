@@ -2,13 +2,14 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/lib/supabase/client";
+import toast from "react-hot-toast";
 
 const schema = z.object({
   property_id: z.string().uuid(),
   first_name: z.string().min(1),
   last_name: z.string().min(1),
   email: z.string().email(),
-  phone: z.number().min(1),
+  phone: z.string().min(1),
   current_address: z.string().min(1),
   postcode: z.string().min(1),
   buying_status: z.string().min(1),
@@ -45,14 +46,48 @@ export default function RequestViewingModal({
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormData) => {
-    const { error } = await supabase.from("request_viewings").insert([data]);
-    if (!error) {
-      alert("Submitted!");
+    try {
+      // Submit viewing request
+      const { error: viewingError } = await supabase
+        .from("request_viewings")
+        .insert([data]);
+
+      if (viewingError) {
+        console.error("Error submitting viewing request:", viewingError);
+        alert("Error submitting form. Please try again.");
+        return;
+      }
+
+      // Newsletter subscription — via API
+      if (data.subscribe_newsletter) {
+        try {
+          const response = await fetch("/api/newsletter/subscribe", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: data.email,
+              source: "viewing_request_form",
+            }),
+          });
+
+          const result = await response.json();
+          if (!result.success) {
+            console.warn("Newsletter subscription issue:", result.error);
+            toast.error("Error submitting form. Please try again.");
+          }
+        } catch (apiError) {
+          console.error("Error calling newsletter API:", apiError);
+        }
+      }
+
+      toast.success("Viewing request submitted successfully!");
       reset();
       onClose();
-    } else {
-      alert("Error submitting form.");
-      console.error(error);
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
     }
   };
 

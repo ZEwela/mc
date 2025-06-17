@@ -70,6 +70,7 @@ export default function PropertyEditForm({
         });
         setExistingImages(data.images || []);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("Failed to fetch property details");
     } finally {
