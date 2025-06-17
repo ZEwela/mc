@@ -56,8 +56,6 @@ export function useProperties(filters?: PropertyFilters) {
     fetchProperties();
   }, [JSON.stringify(filters)]);
 
-  console.log(properties);
-
   return { properties, loading, error };
 }
 

@@ -20,7 +20,7 @@ export function Footer() {
     e.preventDefault();
     if (isFormValid) {
       // Handle the submission logic here
-      console.log("Submitted email:", email);
+
       alert("Subscription logic still needs to be implemented");
       // reset form
       setEmail("");

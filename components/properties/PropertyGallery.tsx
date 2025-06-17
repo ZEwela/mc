@@ -8,11 +8,18 @@ import { Button } from "@/components/ui/Button";
 interface PropertyGalleryProps {
   images: string[];
   title: string;
+  showLightBox: boolean;
+  setShowGallery: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function PropertyGallery({ images, title }: PropertyGalleryProps) {
+export function PropertyGallery({
+  images,
+  title,
+  showLightBox,
+  setShowGallery,
+}: PropertyGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showLightbox, setShowLightbox] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(showLightBox || false);
 
   const nextImage = () => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
@@ -48,7 +55,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white  opacity-0 group-hover:opacity-100 transition-opacity "
                 onClick={(e) => {
                   e.stopPropagation();
                   prevImage();
@@ -59,7 +66,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white  opacity-0 group-hover:opacity-100 transition-opacity "
                 onClick={(e) => {
                   e.stopPropagation();
                   nextImage();
@@ -100,16 +107,19 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
 
       {/* Lightbox */}
       {showLightbox && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-[#F5F1EC]  flex items-center justify-center">
           <button
-            onClick={() => setShowLightbox(false)}
-            className="absolute top-4 right-4 text-white hover:bg-white/20 p-2 rounded focus:outline-none z-50 pointer-events-auto"
+            onClick={() => {
+              setShowLightbox(false);
+              setShowGallery(false);
+            }}
+            className="absolute top-4 right-4 text-black hover:bg-white/20 p-2 rounded focus:outline-none z-50 pointer-events-auto"
             aria-label="Close"
           >
             <X className="h-6 w-6" />
           </button>
 
-          <div className="relative w-full h-full flex items-center justify-center px-4">
+          <div className="relative w-full h-full flex items-center justify-center px-10">
             <div className="relative max-w-4xl max-h-full">
               <Image
                 src={images[currentIndex]}
@@ -125,7 +135,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20"
+                  className="absolute -left-4 md:left-3 top-1/2 transform -translate-y-1/2 text-black  focus:outline-none focus:ring-0 active:ring-0 focus:ring-offset-0"
                   onClick={prevImage}
                 >
                   <ChevronLeft className="h-8 w-8" />
@@ -133,7 +143,7 @@ export function PropertyGallery({ images, title }: PropertyGalleryProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:bg-white/20"
+                  className="absolute -right-4 md:right-3 top-1/2 transform -translate-y-1/2 text-black  focus:outline-none focus:ring-0 active:ring-0 focus:ring-offset-0"
                   onClick={nextImage}
                 >
                   <ChevronRight className="h-8 w-8" />

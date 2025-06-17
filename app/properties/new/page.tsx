@@ -66,7 +66,6 @@ export default function AddPropertyForm() {
         .upload(fileName, file);
 
       if (uploadError) {
-        console.log(uploadError);
         throw new Error(`Failed to upload ${file.name}`);
       }
 

@@ -71,7 +71,6 @@ export default function PropertyEditForm({
         setExistingImages(data.images || []);
       }
     } catch (err) {
-      console.log(err);
       setError("Failed to fetch property details");
     } finally {
       setFetchingProperty(false);
@@ -120,7 +119,6 @@ export default function PropertyEditForm({
         .upload(fileName, file);
 
       if (uploadError) {
-        console.log(uploadError);
         throw new Error(`Failed to upload ${file.name}`);
       }
 

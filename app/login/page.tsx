@@ -19,7 +19,6 @@ export default function LoginPage() {
     if (error) {
       setError(error.message);
     } else if (data?.user) {
-      console.log("Logged in:", data.user.email);
       router.push("/admin");
     }
   };

@@ -52,8 +52,6 @@ export function SoldPropertiesCarousel() {
     );
   }
 
-  console.log("sold", soldProperties);
-
   if (soldProperties.length === 0) {
     return (
       <section className="py-16">

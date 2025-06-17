@@ -400,12 +400,8 @@ Property Team`,
     if (!confirm("Are you sure you want to delete this inquiry?")) return;
 
     try {
-      const { data, error } = await supabase
-        .from("inquiries")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("inquiries").delete().eq("id", id);
       if (error) throw error;
-      console.log(data);
 
       setInquiries((prev) => prev.filter((inquiry) => inquiry.id !== id));
       loadStats();
