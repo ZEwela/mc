@@ -505,13 +505,20 @@ Property Team`,
             </div>
 
             {/* Right side: Admin button above Logout button */}
-            <div className="flex flex-col  sm:items-center sm:gap-3">
+            <div className="flex flex-col  sm:items-center sm:gap-3 gap-2">
               <Button
                 variant="outline"
                 onClick={() => router.push("/admin/properties")}
                 className="  px-4 py-2 rounded hover:bg-gray-300"
               >
                 Admin Properties
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/admin/viewings")}
+                className="  px-4 py-2 rounded hover:bg-gray-300"
+              >
+                Admin Viewing Requests
               </Button>
               <button
                 onClick={handleLogout}
