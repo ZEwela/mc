@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useProperties } from "@/lib/hooks/useProperties";
+import { useState, useMemo, useEffect } from "react";
+import { usePaginatedProperties } from "@/lib/hooks/useProperties";
 import { PropertyGrid } from "@/components/properties/PropertyGrid";
 import { PropertyFilter } from "@/components/properties/PropertyFilter";
 import { useRouter } from "next/navigation";
@@ -13,17 +13,29 @@ import {
 import type { PropertyFilters } from "@/types/property";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Button } from "@/components/ui/Button";
+import { useInView } from "react-intersection-observer";
 
 export default function PropertiesPage() {
   const router = useRouter();
   const [filters, setFilters] = useState<PropertyFilters>({});
   const [searchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
+  const [page, setPage] = useState(1);
 
-  const { properties, loading, error } = useProperties(filters);
+  const { ref, inView } = useInView({ threshold: 1 });
+
+  const { properties, loading, error, hasMore, totalCount } =
+    usePaginatedProperties(filters, page);
 
   const session = useSession();
   const isAuthenticated = !!session;
+
+  // Load next page when user scrolls to bottom
+  useEffect(() => {
+    if (inView && !loading && hasMore) {
+      setPage((prev) => prev + 1);
+    }
+  }, [inView, loading, hasMore]);
 
   // Filter properties by search query
   const searchedProperties = useMemo(() => {
@@ -56,6 +68,10 @@ export default function PropertiesPage() {
         return sorted;
     }
   }, [searchedProperties, sortBy]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
 
   if (error) {
     return (
@@ -100,7 +116,11 @@ export default function PropertiesPage() {
         <div className="flex items-center justify-between mb-8 flex-col gap-4 md:flex-row">
           <div className="flex items-center space-x-4">
             <h2 className="text-2xl font-semibold text-gray-900">
-              {loading ? "Loading..." : `${sortedProperties.length} Properties`}
+              {loading
+                ? "Loading..."
+                : Object.keys(filters).length === 0 && totalCount !== null
+                ? `${totalCount} Properties Available`
+                : `${sortedProperties.length} Properties`}
             </h2>
           </div>
 
@@ -122,6 +142,11 @@ export default function PropertiesPage() {
 
         {/* Properties Grid */}
         <PropertyGrid properties={sortedProperties} loading={loading} />
+
+        {/* Infinite Scroll Loader */}
+        <div ref={ref} className="text-center py-6">
+          {loading && <span className="text-gray-500">Loading more...</span>}
+        </div>
       </div>
     </div>
   );

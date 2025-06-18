@@ -59,6 +59,89 @@ export function useProperties(filters?: PropertyFilters) {
   return { properties, loading, error };
 }
 
+export function usePaginatedProperties(
+  filters: PropertyFilters = {},
+  page = 1,
+  pageSize = 12
+) {
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalCount, setTotalCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    setProperties([]); // reset properties if filters change
+    setHasMore(true);
+    setTotalCount(null);
+  }, [JSON.stringify(filters)]);
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      setLoading(true);
+      try {
+        let query = supabase
+          .from("properties")
+          .select("*", { count: "exact" })
+          .eq("status", filters?.status || "available")
+          .order("created_at", { ascending: false })
+          .range((page - 1) * pageSize, page * pageSize - 1);
+
+        console.log("fetching more", page);
+
+        // Apply filters
+        if (filters?.location) {
+          query = query.ilike("location", `%${filters.location}%`);
+        }
+        if (filters?.property_type) {
+          query = query.eq("property_type", filters.property_type);
+        }
+        if (filters?.min_price) {
+          query = query.gte("price", filters.min_price);
+        }
+        if (filters?.max_price) {
+          query = query.lte("price", filters.max_price);
+        }
+        if (filters?.min_bedrooms) {
+          query = query.gte("bedrooms", filters.min_bedrooms);
+        }
+        if (filters?.max_bedrooms) {
+          query = query.lte("bedrooms", filters.max_bedrooms);
+        }
+        if (filters?.featured !== undefined) {
+          query = query.eq("featured", filters.featured);
+        }
+
+        const { data, error, count } = await query;
+
+        if (count !== null && count !== undefined) {
+          setTotalCount(count);
+        }
+
+        if (error) throw error;
+
+        if (data.length < pageSize) {
+          setHasMore(false); // no more results
+        }
+
+        setProperties((prev) => {
+          const existingIds = new Set(prev.map((p) => p.id));
+          const newProps = data.filter((p) => !existingIds.has(p.id));
+          return [...prev, ...newProps];
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, [JSON.stringify(filters), page]);
+
+  return { properties, loading, error, hasMore, totalCount };
+}
+
 export function useProperty(id: string) {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
