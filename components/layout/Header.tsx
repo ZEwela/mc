@@ -5,9 +5,12 @@ import Link from "next/link";
 import { Menu, ArrowLeft } from "lucide-react";
 import { FaInstagram, FaFacebook } from "react-icons/fa";
 import { navLinkClass } from "@/lib/classnames";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const session = useSession();
+  const isAuthenticated = !!session;
 
   const leftNav = [
     { name: "Properties", href: "/properties" },
@@ -17,6 +20,7 @@ export function Header() {
   const rightNav = [
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
+    ...(isAuthenticated ? [{ name: "Admin", href: "/admin" }] : []),
   ];
 
   return (
@@ -59,10 +63,6 @@ export function Header() {
               </Link>
             ))}
           </nav>
-
-          {/* <button className="p-2 text-gray-700 hover:text-gray-900">
-            <Search className="h-4 w-4" />
-          </button> */}
         </div>
       </div>
 
