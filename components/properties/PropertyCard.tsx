@@ -25,21 +25,55 @@ export function PropertyCard({
   return (
     <Link
       href={`/properties/${property.id}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => {
+        if (
+          typeof window !== "undefined" &&
+          window.matchMedia("(min-width: 768px)").matches
+        ) {
+          setHovered(true);
+        }
+      }}
+      onMouseLeave={() => {
+        if (
+          typeof window !== "undefined" &&
+          window.matchMedia("(min-width: 768px)").matches
+        ) {
+          setHovered(false);
+        }
+      }}
     >
       <Card
         className={`flex flex-col bg-[#F5F1EC] overflow-hidden border-0 shadow-none transition-shadow duration-300 rounded-none ${
-          tallImage ? "h-[480px]" : "h-[420px]"
+          tallImage ? "h-[480px]" : "h-[430px]"
         }`}
       >
-        <div className={`relative ${tallImage ? "h-80" : "h-64"} shrink-0`}>
+        <div className={`relative ${tallImage ? "h-80" : "h-74"} shrink-0`}>
           <Image
-            src={imgError ? fallbackImage : hovered ? hoverImage : mainImage}
+            src={imgError ? fallbackImage : mainImage}
             alt={property.title}
             fill
-            className="object-cover"
+            className={`
+      object-cover transition-opacity duration-500
+      md:${hovered ? "opacity-0" : "opacity-100"} 
+      ${hovered ? "opacity-0 md:opacity-0" : "opacity-100 md:opacity-100"}
+    `}
             onError={() => setImgError(true)}
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority
+          />
+
+          {/* Hover image - only visible on md+ screens */}
+          <Image
+            src={imgError ? fallbackImage : hoverImage}
+            alt={property.title}
+            fill
+            className={`
+      object-cover absolute inset-0 transition-opacity duration-500
+      opacity-0 md:${hovered ? "opacity-100" : "opacity-0"}
+    `}
+            onError={() => setImgError(true)}
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority
           />
           {property.featured && (
             <div className="absolute top-4 left-4 bg-gray-900/50 text-white px-3 py-1 rounded text-sm font-medium">

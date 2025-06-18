@@ -344,7 +344,6 @@ export default function PropertyEditForm({
               <input
                 name="year_built"
                 type="number"
-                min="1800"
                 max={new Date().getFullYear()}
                 placeholder="Year property was built"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"

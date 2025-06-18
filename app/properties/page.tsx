@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { usePaginatedProperties } from "@/lib/hooks/useProperties";
 import { PropertyGrid } from "@/components/properties/PropertyGrid";
 import { PropertyFilter } from "@/components/properties/PropertyFilter";
@@ -21,8 +21,14 @@ export default function PropertiesPage() {
   const [searchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const { ref, inView } = useInView({ threshold: 1 });
+  // intersection observer for smooth loading
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+    rootMargin: "700px 0px", // Trigger loading  before reaching the element
+    triggerOnce: false,
+  });
 
   const { properties, loading, error, hasMore, totalCount } =
     usePaginatedProperties(filters, page);
@@ -30,14 +36,23 @@ export default function PropertiesPage() {
   const session = useSession();
   const isAuthenticated = !!session;
 
-  // Load next page when user scrolls to bottom
-  useEffect(() => {
-    if (inView && !loading && hasMore) {
-      setPage((prev) => prev + 1);
-    }
-  }, [inView, loading, hasMore]);
+  // Optimized scroll handler with debouncing
+  const handleLoadMore = useCallback(async () => {
+    if (inView && !loading && !isLoadingMore && hasMore) {
+      setIsLoadingMore(true);
 
-  // Filter properties by search query
+      // Add a small delay to prevent too rapid loading
+      setTimeout(() => {
+        setPage((prev) => prev + 1);
+        setIsLoadingMore(false);
+      }, 300);
+    }
+  }, [inView, loading, isLoadingMore, hasMore]);
+
+  useEffect(() => {
+    handleLoadMore();
+  }, [handleLoadMore]);
+
   const searchedProperties = useMemo(() => {
     if (!searchQuery.trim()) return properties;
 
@@ -82,6 +97,12 @@ export default function PropertiesPage() {
               Something went wrong
             </h1>
             <p className="text-gray-600">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
           </div>
         </div>
       </div>
@@ -110,16 +131,20 @@ export default function PropertiesPage() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8 bg-[#F5F1EC]">
         {/* Filters */}
-        <PropertyFilter onFiltersChange={setFilters} initialFilters={filters} />
-
+        <div className="animate-fade-in">
+          <PropertyFilter
+            onFiltersChange={setFilters}
+            initialFilters={filters}
+          />
+        </div>
         {/* Results Header */}
-        <div className="flex items-center justify-between mb-8 flex-col gap-4 md:flex-row">
+        <div className="flex items-center justify-between mb-8 flex-col gap-4 md:flex-row animate-fade-in">
           <div className="flex items-center space-x-4">
             <h2 className="text-2xl font-semibold text-gray-900">
               {loading
                 ? "Loading..."
                 : Object.keys(filters).length === 0 && totalCount !== null
-                ? `${totalCount} Properties Available`
+                ? `${totalCount} Properties`
                 : `${sortedProperties.length} Properties`}
             </h2>
           </div>
@@ -143,9 +168,26 @@ export default function PropertiesPage() {
         {/* Properties Grid */}
         <PropertyGrid properties={sortedProperties} loading={loading} />
 
-        {/* Infinite Scroll Loader */}
-        <div ref={ref} className="text-center py-6">
-          {loading && <span className="text-gray-500">Loading more...</span>}
+        {/* Infinite Scroll Trigger & Loading Indicator */}
+        <div className="py-8">
+          {/* Invisible trigger element */}
+          <div ref={ref} className="h-1" />
+
+          {/* Infinite Scroll Trigger */}
+          <div className="py-4">
+            {/* Invisible trigger element */}
+            <div ref={ref} className="h-1" />
+
+            {/* End of results indicator */}
+            {!hasMore && !loading && sortedProperties.length > 6 && (
+              <div className="text-center py-6">
+                <span className="text-gray-400 text-sm">
+                  You&apos;ve reached the end • {sortedProperties.length}{" "}
+                  properties shown
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
