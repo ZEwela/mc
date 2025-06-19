@@ -31,9 +31,11 @@ TearEffectProps) {
     <div
       style={{
         backgroundColor: topColor,
-        backgroundImage: `url(${topBackgroundImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        ...(topBackgroundImage && {
+          backgroundImage: `url(${topBackgroundImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }),
       }}
     >
       {/* Top section */}
@@ -44,21 +46,25 @@ TearEffectProps) {
         <div
           style={{
             backgroundColor: bottomColor,
-            backgroundImage: `url(${bottomBackgroundImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            ...(bottomBackgroundImage && {
+              backgroundImage: `url(${bottomBackgroundImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }),
             clipPath: clipPaths[direction],
             WebkitClipPath: clipPaths[direction],
-            height: "300px", // height of the tear
+            height: "300px",
             marginBottom: "-250px",
           }}
         />
         <div
           style={{
             backgroundColor: bottomColor,
-            backgroundImage: `url(${bottomBackgroundImage})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            ...(bottomBackgroundImage && {
+              backgroundImage: `url(${bottomBackgroundImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }),
           }}
           className="relative z-10"
         >

@@ -32,7 +32,7 @@ export function PropertySort({ currentSort, onSortChange }: PropertySortProps) {
         <select
           value={currentSort}
           onChange={(e) => onSortChange(e.target.value as SortOption)}
-          className="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+          className=" text-gray-700 appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
