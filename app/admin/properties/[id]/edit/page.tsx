@@ -1,11 +1,14 @@
 import PropertyEditForm from "@/components/properties/PropertyEditForm";
 
 interface PropertyEditPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function EditPropertyPage({ params }: PropertyEditPageProps) {
-  return <PropertyEditForm propertyId={params.id} />;
+export default async function EditPropertyPage({
+  params,
+}: PropertyEditPageProps) {
+  const { id } = await params;
+  return <PropertyEditForm propertyId={id} />;
 }

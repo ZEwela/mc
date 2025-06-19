@@ -2,15 +2,12 @@
 import { useProperty } from "@/lib/hooks/useProperties";
 import { PropertyDetails } from "@/components/properties/PropertyDetails";
 import { notFound } from "next/navigation";
+import { useParams } from "next/navigation";
 
-interface PropertyPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function PropertyPage({ params }: PropertyPageProps) {
-  const { property, loading, error } = useProperty(params.id);
+export default function PropertyPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const { property, loading, error } = useProperty(id);
 
   if (loading) {
     return (
