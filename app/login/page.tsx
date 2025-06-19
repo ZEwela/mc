@@ -29,7 +29,9 @@ export default function LoginPage() {
         onSubmit={handleLogin}
         className="bg-white shadow-md rounded px-8 pt-6 pb-8 w-full max-w-md"
       >
-        <h1 className="text-2xl font-semibold mb-6">Admin Login</h1>
+        <h1 className="text-2xl font-semibold mb-6 text-gray-600">
+          Admin Login
+        </h1>
 
         {error && <p className="mb-4 text-red-500 text-sm">{error}</p>}
 
@@ -38,7 +40,7 @@ export default function LoginPage() {
           placeholder="Email"
           value={form.email}
           onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-          className="w-full mb-4 px-3 py-2 border rounded"
+          className="text-gray-600 w-full mb-4 px-3 py-2 border rounded"
           required
         />
         <input
@@ -46,7 +48,7 @@ export default function LoginPage() {
           placeholder="Password"
           value={form.password}
           onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-          className="w-full mb-6 px-3 py-2 border rounded"
+          className="text-gray-600 w-full mb-6 px-3 py-2 border rounded"
           required
         />
         <button
