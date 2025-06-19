@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase/client";
 import type { Property, PropertyFilters } from "@/types/property";
 
@@ -58,160 +58,148 @@ export function useProperties(filters?: PropertyFilters) {
 
   return { properties, loading, error };
 }
-
-export function usePaginatedProperties(
-  filters: PropertyFilters = {},
-  page = 1,
-  pageSize = 12
-) {
+const PAGE_SIZE = 12;
+export function usePaginatedProperties(filters: PropertyFilters = {}) {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState<number | null>(null);
 
-  // Reset state when filters change
-  useEffect(() => {
+  // Reset everything when filters change
+  const resetState = useCallback(() => {
     setProperties([]);
     setHasMore(true);
     setTotalCount(null);
     setError(null);
-  }, [JSON.stringify(filters)]);
+  }, []);
 
+  // Build query with filters
+  const buildQuery = useCallback(
+    (isCountQuery = false) => {
+      let query = supabase
+        .from("properties")
+        .select(isCountQuery ? "*" : "*", {
+          count: isCountQuery ? "exact" : undefined,
+          head: isCountQuery,
+        })
+        .eq("status", filters?.status || "available");
+
+      // Apply filters
+      if (filters?.location) {
+        query = query.ilike("location", `%${filters.location}%`);
+      }
+      if (filters?.property_type) {
+        query = query.eq("property_type", filters.property_type);
+      }
+      if (filters?.min_price) {
+        query = query.gte("price", filters.min_price);
+      }
+      if (filters?.max_price) {
+        query = query.lte("price", filters.max_price);
+      }
+      if (filters?.min_bedrooms) {
+        query = query.gte("bedrooms", filters.min_bedrooms);
+      }
+      if (filters?.max_bedrooms) {
+        query = query.lte("bedrooms", filters.max_bedrooms);
+      }
+      if (filters?.featured !== undefined) {
+        query = query.eq("featured", filters.featured);
+      }
+
+      if (!isCountQuery) {
+        query = query.order("created_at", { ascending: false });
+      }
+
+      return query;
+    },
+    [filters]
+  );
+
+  // Load initial data
+  const loadInitialData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Get total count and first page in parallel
+      const [countResult, dataResult] = await Promise.all([
+        buildQuery(true),
+        buildQuery(false).range(0, PAGE_SIZE - 1),
+      ]);
+
+      if (countResult.error) throw countResult.error;
+      if (dataResult.error) throw dataResult.error;
+
+      const total = countResult.count || 0;
+      const data = dataResult.data || [];
+
+      setTotalCount(total);
+      setProperties(data);
+      setHasMore(data.length === PAGE_SIZE && data.length < total);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load properties"
+      );
+      setProperties([]);
+      setTotalCount(0);
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+    }
+  }, [buildQuery]);
+
+  // Load more data
+  const loadMore = useCallback(async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const from = properties.length;
+      const to = from + PAGE_SIZE - 1;
+
+      const { data, error: dataError } = await buildQuery(false).range(
+        from,
+        to
+      );
+
+      if (dataError) throw dataError;
+
+      const newData = data || [];
+
+      setProperties((prev) => [...prev, ...newData]);
+
+      // Update hasMore based on what we received and total count
+      const newTotal = properties.length + newData.length;
+      setHasMore(newData.length === PAGE_SIZE && newTotal < (totalCount || 0));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load more properties"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [buildQuery, loading, hasMore, properties.length, totalCount]);
+
+  // Reset and load when filters change
   useEffect(() => {
-    const fetchProperties = async () => {
-      // Calculate the offset for this page
-      const from = (page - 1) * pageSize;
+    resetState();
+    loadInitialData();
+  }, [loadInitialData, resetState]);
 
-      // If we already know the total count and the offset exceeds it, don't fetch
-      if (totalCount !== null && from >= totalCount) {
-        setHasMore(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      try {
-        // First, get the total count if we don't have it yet
-        if (totalCount === null) {
-          let countQuery = supabase
-            .from("properties")
-            .select("*", { count: "exact", head: true })
-            .eq("status", filters?.status || "available");
-
-          // Apply the same filters for count
-          if (filters?.location) {
-            countQuery = countQuery.ilike("location", `%${filters.location}%`);
-          }
-          if (filters?.property_type) {
-            countQuery = countQuery.eq("property_type", filters.property_type);
-          }
-          if (filters?.min_price) {
-            countQuery = countQuery.gte("price", filters.min_price);
-          }
-          if (filters?.max_price) {
-            countQuery = countQuery.lte("price", filters.max_price);
-          }
-          if (filters?.min_bedrooms) {
-            countQuery = countQuery.gte("bedrooms", filters.min_bedrooms);
-          }
-          if (filters?.max_bedrooms) {
-            countQuery = countQuery.lte("bedrooms", filters.max_bedrooms);
-          }
-          if (filters?.featured !== undefined) {
-            countQuery = countQuery.eq("featured", filters.featured);
-          }
-
-          const { count, error: countError } = await countQuery;
-
-          if (countError) throw countError;
-
-          setTotalCount(count || 0);
-
-          // If the offset exceeds the total count, don't proceed with data fetch
-          if (count !== null && from >= count) {
-            setHasMore(false);
-            setLoading(false);
-            return;
-          }
-        }
-
-        // Now fetch the actual data
-        let dataQuery = supabase
-          .from("properties")
-          .select("*")
-          .eq("status", filters?.status || "available")
-          .order("created_at", { ascending: false });
-
-        // Apply filters
-        if (filters?.location) {
-          dataQuery = dataQuery.ilike("location", `%${filters.location}%`);
-        }
-        if (filters?.property_type) {
-          dataQuery = dataQuery.eq("property_type", filters.property_type);
-        }
-        if (filters?.min_price) {
-          dataQuery = dataQuery.gte("price", filters.min_price);
-        }
-        if (filters?.max_price) {
-          dataQuery = dataQuery.lte("price", filters.max_price);
-        }
-        if (filters?.min_bedrooms) {
-          dataQuery = dataQuery.gte("bedrooms", filters.min_bedrooms);
-        }
-        if (filters?.max_bedrooms) {
-          dataQuery = dataQuery.lte("bedrooms", filters.max_bedrooms);
-        }
-        if (filters?.featured !== undefined) {
-          dataQuery = dataQuery.eq("featured", filters.featured);
-        }
-
-        // Apply range
-        const to = from + pageSize - 1;
-        dataQuery = dataQuery.range(from, to);
-
-        const { data, error: dataError } = await dataQuery;
-
-        if (dataError) throw dataError;
-
-        // Update properties
-        if (page === 1) {
-          setProperties(data || []);
-        } else {
-          setProperties((prev) => {
-            const existingIds = new Set(prev.map((p) => p.id));
-            const newProps = (data || []).filter((p) => !existingIds.has(p.id));
-            return [...prev, ...newProps];
-          });
-        }
-
-        // Update hasMore based on what we received
-        const receivedCount = data?.length || 0;
-        const currentTotalLoaded =
-          page === 1 ? receivedCount : properties.length + receivedCount;
-        const knownTotal = totalCount || 0;
-
-        setHasMore(
-          receivedCount === pageSize && currentTotalLoaded < knownTotal
-        );
-      } catch (err) {
-        // Handle the specific PostgREST range error gracefully
-        if (err instanceof Error && err.message.includes("PGRST103")) {
-          setHasMore(false);
-        } else {
-          setError(err instanceof Error ? err.message : "An error occurred");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProperties();
-  }, [JSON.stringify(filters), page, pageSize, totalCount]);
-
-  return { properties, loading, error, hasMore, totalCount };
+  return {
+    properties,
+    loading,
+    error,
+    hasMore,
+    totalCount,
+    loadMore,
+  };
 }
+
 export function useProperty(id: string) {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);

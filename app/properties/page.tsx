@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { usePaginatedProperties } from "@/lib/hooks/useProperties";
 import { PropertyGrid } from "@/components/properties/PropertyGrid";
 import { PropertyFilter } from "@/components/properties/PropertyFilter";
 import { useRouter } from "next/navigation";
-
 import {
   PropertySort,
   type SortOption,
@@ -17,42 +16,32 @@ import { useInView } from "react-intersection-observer";
 
 export default function PropertiesPage() {
   const router = useRouter();
-  const [filters, setFilters] = useState<PropertyFilters>({});
-  const [searchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const [page, setPage] = useState(1);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-
-  // intersection observer for smooth loading
-  const { ref, inView } = useInView({
-    threshold: 0.1,
-    rootMargin: "700px 0px", // Trigger loading  before reaching the element
-    triggerOnce: false,
-  });
-
-  const { properties, loading, error, hasMore, totalCount } =
-    usePaginatedProperties(filters, page);
-
   const session = useSession();
   const isAuthenticated = !!session;
 
-  // Optimized scroll handler with debouncing
-  const handleLoadMore = useCallback(async () => {
-    if (inView && !loading && !isLoadingMore && hasMore) {
-      setIsLoadingMore(true);
+  // State
+  const [filters, setFilters] = useState<PropertyFilters>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
 
-      // Add a small delay to prevent too rapid loading
-      setTimeout(() => {
-        setPage((prev) => prev + 1);
-        setIsLoadingMore(false);
-      }, 300);
-    }
-  }, [inView, loading, isLoadingMore, hasMore]);
+  // Data fetching
+  const { properties, loading, error, hasMore, totalCount, loadMore } =
+    usePaginatedProperties(filters);
 
+  // Intersection observer for infinite scroll
+  const { ref, inView } = useInView({
+    threshold: 0.1,
+    rootMargin: "200px 0px",
+  });
+
+  // Load more when intersection is triggered
   useEffect(() => {
-    handleLoadMore();
-  }, [inView]);
+    if (inView && hasMore && !loading) {
+      loadMore();
+    }
+  }, [inView, hasMore, loading, loadMore]);
 
+  // Filter properties by search query
   const searchedProperties = useMemo(() => {
     if (!searchQuery.trim()) return properties;
 
@@ -79,15 +68,26 @@ export default function PropertiesPage() {
         return sorted.sort((a, b) => (a.bedrooms || 0) - (b.bedrooms || 0));
       case "bedrooms_high":
         return sorted.sort((a, b) => (b.bedrooms || 0) - (a.bedrooms || 0));
+      case "newest":
       default:
-        return sorted;
+        return sorted; // Already sorted by created_at in the query
     }
   }, [searchedProperties, sortBy]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [filters]);
+  // Get display count for header
+  const displayCount = useMemo(() => {
+    if (loading && properties.length === 0) return "Loading...";
+    if (searchQuery.trim()) return `${sortedProperties.length}`;
+    return totalCount !== null ? `${totalCount}` : `${properties.length}`;
+  }, [
+    loading,
+    properties.length,
+    totalCount,
+    sortedProperties.length,
+    searchQuery,
+  ]);
 
+  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -135,54 +135,57 @@ export default function PropertiesPage() {
           <PropertyFilter
             onFiltersChange={setFilters}
             initialFilters={filters}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
         </div>
+
         {/* Results Header */}
         <div className="flex items-center justify-between mb-8 flex-col gap-4 md:flex-row animate-fade-in">
           <div className="flex items-center space-x-4">
             <h2 className="text-2xl font-semibold text-gray-900">
-              {loading
-                ? "Loading..."
-                : Object.keys(filters).length === 0 && totalCount !== null
-                ? `${totalCount} Properties`
-                : `${sortedProperties.length} Properties`}
+              {displayCount} {displayCount === "1" ? "Property" : "Properties"}
             </h2>
           </div>
 
-          {!loading && sortedProperties.length > 0 && (
-            <PropertySort currentSort={sortBy} onSortChange={setSortBy} />
-          )}
-          {isAuthenticated && (
-            <div className="flex justify-end mb-6">
+          <div className="flex items-center gap-4">
+            {sortedProperties.length > 0 && (
+              <PropertySort currentSort={sortBy} onSortChange={setSortBy} />
+            )}
+
+            {isAuthenticated && (
               <Button
                 variant="outline"
                 onClick={() => router.push("/properties/new")}
-                className="  px-4 py-2 rounded hover:bg-gray-800"
+                className="px-4 py-2 rounded hover:bg-gray-800"
               >
                 + Add New Property
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Properties Grid */}
         <PropertyGrid properties={sortedProperties} loading={loading} />
 
-        {/* Infinite Scroll Trigger & Loading Indicator */}
-        <div className="py-8">
-          {/* Invisible trigger element */}
-          <div ref={ref} className="h-1" />
+        {/* Infinite Scroll Trigger */}
+        {hasMore && (
+          <div ref={ref} className="h-10 flex items-center justify-center">
+            {loading && (
+              <div className="text-gray-500">Loading more properties...</div>
+            )}
+          </div>
+        )}
 
-          {/* End of results indicator */}
-          {!hasMore && !loading && sortedProperties.length > 6 && (
-            <div className="text-center py-6">
-              <span className="text-gray-400 text-sm">
-                You&apos;ve reached the end • {sortedProperties.length}{" "}
-                properties shown
-              </span>
-            </div>
-          )}
-        </div>
+        {/* End of results indicator */}
+        {!hasMore && !loading && sortedProperties.length > 6 && (
+          <div className="text-center py-6">
+            <span className="text-gray-400 text-sm">
+              You&apos;ve reached the end • {sortedProperties.length} properties
+              shown
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
