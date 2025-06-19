@@ -51,7 +51,7 @@ export default function PropertiesPage() {
 
   useEffect(() => {
     handleLoadMore();
-  }, [handleLoadMore]);
+  }, [inView]);
 
   const searchedProperties = useMemo(() => {
     if (!searchQuery.trim()) return properties;
@@ -173,21 +173,15 @@ export default function PropertiesPage() {
           {/* Invisible trigger element */}
           <div ref={ref} className="h-1" />
 
-          {/* Infinite Scroll Trigger */}
-          <div className="py-4">
-            {/* Invisible trigger element */}
-            <div ref={ref} className="h-1" />
-
-            {/* End of results indicator */}
-            {!hasMore && !loading && sortedProperties.length > 6 && (
-              <div className="text-center py-6">
-                <span className="text-gray-400 text-sm">
-                  You&apos;ve reached the end • {sortedProperties.length}{" "}
-                  properties shown
-                </span>
-              </div>
-            )}
-          </div>
+          {/* End of results indicator */}
+          {!hasMore && !loading && sortedProperties.length > 6 && (
+            <div className="text-center py-6">
+              <span className="text-gray-400 text-sm">
+                You&apos;ve reached the end • {sortedProperties.length}{" "}
+                properties shown
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
